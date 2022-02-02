@@ -41,5 +41,9 @@ contract Course is ERC1155 {
         amount = newPrice;
     }
 
+    function getAmount() public view returns (unint256) {
+        return amount;
+    }
+
     receive() external payable {}
 }

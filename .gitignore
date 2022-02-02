@@ -2,8 +2,13 @@
 
 # dependencies
 /node_modules
+<<<<<<< HEAD
 /contracts/node_modules
 /front/node_modules
+=======
+./front/node_modules
+./contract/node_modules
+>>>>>>> master
 /.pnp
 .pnp.js
 
