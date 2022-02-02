@@ -1,13 +1,13 @@
-import '../form.css';
+import '../App.css';
 import axios from 'axios';
 import React, { Component, useState } from 'react';
-import env from "react-dotenv";
+import env from 'react-dotenv';
 import { v4 as uuidv4 } from 'uuid';
-var CryptoJS = require("crypto-js");
-const FormData = require('form-data');
 import { supabase } from '../helpers/db.js';
+var CryptoJS = require('crypto-js');
+const FormData = require('form-data');
 
-function Form() {
+export default function Form() {
   const [selectedVideoFile, setSelectedVideoFile] = useState(null);
   const [selectedImageFile, setSelectedImageFile] = useState(null);
   const [title, setTitle] = useState('');
@@ -151,25 +151,35 @@ function Form() {
 
     async function main() {
       const encryption_key = uuidv4();
-      console.log(encryption_key)
-      const ipfsVideoUrl = await pinVideoFileToIPFS(env.PINATA_KEY, env.PINATA_SECRET_KEY);
-      var ciphertext = CryptoJS.AES.encrypt(JSON.stringify(ipfsVideoUrl), encryption_key).toString();
-      const ipfsImageUrl = await pinImageFileToIPFS(env.PINATA_KEY, env.PINATA_SECRET_KEY);
+      console.log(encryption_key);
+      const ipfsVideoUrl = await pinVideoFileToIPFS(
+        env.PINATA_KEY,
+        env.PINATA_SECRET_KEY
+      );
+      var ciphertext = CryptoJS.AES.encrypt(
+        JSON.stringify(ipfsVideoUrl),
+        encryption_key
+      ).toString();
+      const ipfsImageUrl = await pinImageFileToIPFS(
+        env.PINATA_KEY,
+        env.PINATA_SECRET_KEY
+      );
       const dataJson = {
-        'collection': {
-          'name': 'MICHI',
-          'description': 'MICHI is a new way to learn and share knowledge.',
-          'image': 'https://ipfs.io/ipfs/QmNyKyL9YssHQWGfAUGkigioZWDGZnEbBJHy8pcajmiC7G',
-          'slug': 'michi_learn'
+        collection: {
+          name: 'MICHI',
+          description: 'MICHI is a new way to learn and share knowledge.',
+          image:
+            'https://ipfs.io/ipfs/QmNyKyL9YssHQWGfAUGkigioZWDGZnEbBJHy8pcajmiC7G',
+          slug: 'michi_learn',
         },
-        'ipfs_video_url': ciphertext,
-        'metadata': {
-          'name': title,
-          'description': description,
-          'background_image': ipfsImageUrl,
-        }
-      }
-      pinJSONToIPFS(env.PINATA_KEY, env.PINATA_SECRET_KEY, dataJson)
+        ipfs_video_url: ciphertext,
+        metadata: {
+          name: title,
+          description: description,
+          background_image: ipfsImageUrl,
+        },
+      };
+      pinJSONToIPFS(env.PINATA_KEY, env.PINATA_SECRET_KEY, dataJson);
     }
 
     main();
@@ -244,5 +254,3 @@ function Form() {
     </div>
   );
 }
-
-export default Form;
