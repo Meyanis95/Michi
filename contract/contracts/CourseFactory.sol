@@ -21,4 +21,6 @@ contract CourseFactory {
         );
         array.push(address(newCourseCreated));
     }
+
+    function create 
 }

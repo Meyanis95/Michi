@@ -2,16 +2,64 @@ import '../form.css';
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import env from 'react-dotenv';
+import { ethers } from 'ethers';
+import course from '../utils/course.json';
 var CryptoJS = require('crypto-js');
 const FormData = require('form-data');
 
 export default function Course() {
-  useEffect(() => {
-    console.log(window.location.pathname.split('/')[2]);
-  });
+  const [courseContract, setCourseContract] = useState(null);
 
-  const mintCourse = () => {
-    console.log('clicked');
+  useEffect(() => {
+    const { ethereum } = window;
+
+    // if (!ethereum) {
+    //   console.log('Make sure you have metamask!');
+    //   return;
+    // } else {
+    //   console.log('We have the ethereum object', ethereum);
+    // }
+
+    // const accounts = await ethereum.request({ method: 'eth_accounts' });
+
+    // if (accounts.length !== 0) {
+    //   const account = accounts[0];
+    //   console.log('Found an authorized account:', account);
+    // } else {
+    //   console.log('No authorized account found');
+    // }
+
+    if (ethereum) {
+      const provider = new ethers.providers.Web3Provider(ethereum);
+      const signer = provider.getSigner();
+      console.log(signer);
+      const courseContract = new ethers.Contract(
+        '0xfBe45f41c2EdB5eFDfD9dCc36aD834651ac81B06',
+        course.abi,
+        signer
+      );
+      console.log(courseContract);
+      setCourseContract(courseContract);
+    } else {
+      console.log('Ethereum object not found');
+    }
+  }, []);
+
+  const mintCourse = async () => {
+    try {
+      if (courseContract) {
+        console.log('clicked');
+        console.log(courseContract);
+        console.log('here');
+        const mintTxn = await courseContract.takeClass({
+          value: ethers.utils.parseEther('0.1'),
+        });
+        await mintTxn.wait();
+        console.log('mintTxn:', mintTxn);
+      }
+    } catch (error) {
+      console.error('Error while minting:', error);
+    }
   };
 
   return (
