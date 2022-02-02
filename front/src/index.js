@@ -1,16 +1,18 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import './index.css';
 import App from './App';
-import Form from './routes/form.js';
+import Form from './view/form.js';
+import Course from './view/course.js';
 import reportWebVitals from './reportWebVitals';
 
 ReactDOM.render(
   <BrowserRouter>
     <Routes>
-      <Route path="/" element={<App />} />
-      <Route path="/form" element={<Form />} />
+      <Route exact path="/form" element={<Form />} />
+      <Route exact path="/courses/*" element={<Course />} />
+      <Route path="*" element={<App />} />
     </Routes>
   </BrowserRouter>,
   document.getElementById('root')
