@@ -1,20 +1,13 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import './index.css';
-import App from './App';
-import Form from './view/form.js';
-import Course from './view/course.js';
 import reportWebVitals from './reportWebVitals';
+import App from './App';
 
 ReactDOM.render(
-  <BrowserRouter>
-    <Routes>
-      <Route exact path="/form" element={<Form />} />
-      <Route exact path="/courses/*" element={<Course />} />
-      <Route path="*" element={<App />} />
-    </Routes>
-  </BrowserRouter>,
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>,
   document.getElementById('root')
 );
 
