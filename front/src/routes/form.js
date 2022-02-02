@@ -1,8 +1,9 @@
 import '../form.css';
 import axios from 'axios';
 import React, { Component, useState } from 'react';
-import env from 'react-dotenv';
-var CryptoJS = require('crypto-js');
+import env from "react-dotenv";
+import { v4 as uuidv4 } from 'uuid';
+var CryptoJS = require("crypto-js");
 const FormData = require('form-data');
 import { supabase } from '../helpers/db.js';
 
@@ -41,7 +42,6 @@ function Form() {
 
       const metadata = JSON.stringify({
         name: title,
-        description: description,
         content: content,
       });
       data.append('pinataMetadata', metadata);
@@ -150,29 +150,26 @@ function Form() {
     };
 
     async function main() {
-      const ipfsVideoUrl = await pinVideoFileToIPFS(
-        env.PINATA_KEY,
-        env.PINATA_SECRET_KEY
-      );
-      const ipfsImageUrl = await pinImageFileToIPFS(
-        env.PINATA_KEY,
-        env.PINATA_SECRET_KEY
-      );
+      const encryption_key = uuidv4();
+      console.log(encryption_key)
+      const ipfsVideoUrl = await pinVideoFileToIPFS(env.PINATA_KEY, env.PINATA_SECRET_KEY);
+      var ciphertext = CryptoJS.AES.encrypt(JSON.stringify(ipfsVideoUrl), encryption_key).toString();
+      const ipfsImageUrl = await pinImageFileToIPFS(env.PINATA_KEY, env.PINATA_SECRET_KEY);
       const dataJson = {
-        ipfs_video_url: ipfsVideoUrl,
-        ipfs_backgroung_url: ipfsImageUrl,
-        metadata: {
-          title: title,
-          description: description,
-          content: content,
+        'collection': {
+          'name': 'MICHI',
+          'description': 'MICHI is a new way to learn and share knowledge.',
+          'image': 'https://ipfs.io/ipfs/QmNyKyL9YssHQWGfAUGkigioZWDGZnEbBJHy8pcajmiC7G',
+          'slug': 'michi_learn'
         },
-      };
-      var ciphertext = CryptoJS.AES.encrypt(
-        JSON.stringify(dataJson),
-        'secret key 123'
-      ).toString();
-      console.log(ciphertext);
-      pinJSONToIPFS(env.PINATA_KEY, env.PINATA_SECRET_KEY, ciphertext);
+        'ipfs_video_url': ciphertext,
+        'metadata': {
+          'name': title,
+          'description': description,
+          'background_image': ipfsImageUrl,
+        }
+      }
+      pinJSONToIPFS(env.PINATA_KEY, env.PINATA_SECRET_KEY, dataJson)
     }
 
     main();
