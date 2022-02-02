@@ -9,10 +9,9 @@ contract Course is ERC1155 {
     uint256 public amount;
     uint256 public constant seat = 0;
 
-    constructor(address owner, uint256 amount, string url) public ERC1155(url) {
-        owner = owner;
-        amount = amount;
-        return (address(this));
+    constructor(address deployer, uint256 coursePrice, string memory url) ERC1155(url) {
+        owner = deployer;
+        amount = coursePrice;
     }
 
     function takeClass() public payable {
@@ -22,7 +21,7 @@ contract Course is ERC1155 {
 
     function withDrawMoney(uint256 amountToWithdraw) public {
         require (msg.sender == owner, "You must be the owner to withdraw.");
-        require (balanceOf(this) > amountToWithdraw, "There is no money on this contract");
+        require (address(this).balance > amountToWithdraw, "There is no money on this contract");
         bool sent = payable(msg.sender).send(amountToWithdraw);
         require(sent, "Failed to send Ether");
     }
