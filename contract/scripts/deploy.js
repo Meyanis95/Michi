@@ -4,6 +4,11 @@ const main = async () => {
   await nftContract.deployed();
   console.log("Contract deployed to:", nftContract.address);
 
+  let txn = await nftContract.createLesson(10, "hiehriehrieh")
+  // Wait for it to be mined.
+  await txn.wait()
+  console.log("Lesson created")
+
 };
 
 const runMain = async () => {
