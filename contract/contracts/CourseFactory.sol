@@ -5,8 +5,9 @@ import "hardhat/console.sol";
 import "./Course.sol";
 
 contract CourseFactory {
-    address[] array;
+    address[] public allContracts;
     address owner;
+    mapping(address => address) public ownerContracts;
 
     constructor() {
         owner = msg.sender;
@@ -19,6 +20,19 @@ contract CourseFactory {
             address(newCourseCreated) != address(0),
             "There was an issue while creating the course"
         );
-        array.push(address(newCourseCreated));
+        allContracts.push(address(newCourseCreated));
+        ownerContracts[msg.sender] = address(newCourseCreated);
+    }
+
+    function getContracts() public view returns (address[] memory) {
+        return allContracts;
+    }
+
+    function getCreatorCourse(address _ownerAddress)
+        public
+        view
+        returns (address)
+    {
+        return ownerContracts[_ownerAddress];
     }
 }
