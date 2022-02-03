@@ -4,6 +4,7 @@ import Homepage from './views/homepage.jsx';
 import Home from './views/home.jsx';
 import Form from './views/form.jsx';
 import Coursepage from './views/coursepage.jsx';
+import MyDashBoard from './views/mydashboard.jsx'
 import AvailableCourse from './views/availableCourse.jsx';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
@@ -16,6 +17,7 @@ function App() {
         <Route exact path="/homepage" element={<Homepage />} />
         <Route path="/courses/*" element={<Coursepage />} />
         <Route path="*" element={<Home />} />
+        <Route path="/mydashboard" element={<MyDashBoard />} />
       </Routes>
     </Router>
   );
