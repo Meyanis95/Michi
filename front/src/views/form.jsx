@@ -17,10 +17,10 @@ export default function Form() {
   const [description, setDescription] = useState('');
   const [content, setContent] = useState('');
   const [price, setPrice] = useState(0);
-  const [contractAddressCreatad, setContractAddressCreatad] = useState('');
+  const [contractAddressCreated, setContractAddressCreated] = useState('');
   const [encryptionKey, setEncryptionKey] = useState(null);
   const [currAccount, setCurrentAccount] = useState("")
-  const contractAddress = "0x898bFA5BDfb0a8D36DF067b20D4fdBA7528a4998"
+  const contractAddress = "0x88E94879A723541EDfb814258224CBB4819981D0"
   const contractABI = abi.abi
 
   const onVideoChange = (event) => {
@@ -47,17 +47,19 @@ export default function Form() {
     setPrice(event.target.value);
   };
 
-  const uploadHashOnDb = async () => {
+  const uploadHashOnDb = async (_address) => {
     const { data, error } = await supabase.from('lesson_hash').insert([
       {
-        course_address: contractAddressCreatad,
+        course_address: _address,
         hash: encryptionKey,
       },
     ]);
     if (error) {
       console.log(error);
+      return 'not ok'
     } else {
       console.log(data);
+      return 'ok'
     }
   }
 
@@ -72,9 +74,11 @@ export default function Form() {
     const event = receipt.events
 
     console.log("Address of the contract created ==> ", event[0].address)
-    setContractAddressCreatad(event[0].address)
+    setContractAddressCreated(event[0].address)
 
     console.log("txn:", course_txn);
+
+    return event[0].address
   }
 
   const onFileUpload = () => {
@@ -222,8 +226,8 @@ export default function Form() {
         }
       }
       const uri = await pinJSONToIPFS(env.PINATA_KEY, env.PINATA_SECRET_KEY, dataJson);
-      uploadHashOnDb();
-      mintLesson(price, uri);
+      const up = await mintLesson(price, uri);
+      uploadHashOnDb(up);
     }
 
     main();
