@@ -3,8 +3,9 @@ import axios from 'axios';
 import React, { Component, useState } from 'react';
 import env from 'react-dotenv';
 import { v4 as uuidv4 } from 'uuid';
-import { supabase } from '../helpers/db.js';
-var CryptoJS = require('crypto-js');
+import { ethers } from "ethers";
+import abi from "../utils/CourseFactory.json"
+var CryptoJS = require("crypto-js");
 const FormData = require('form-data');
 
 export default function Form() {
@@ -13,6 +14,10 @@ export default function Form() {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [content, setContent] = useState('');
+  const [price, setPrice] = useState(0);
+  const [currAccount, setCurrentAccount] = useState("")
+  const contractAddress = "0x50d0d47C2C08d5A70BC9bC29734a2f62bEe9Bc24"
+  const contractABI = abi.abi
 
   const onVideoChange = (event) => {
     setSelectedVideoFile(event.target.files[0]);
@@ -33,6 +38,20 @@ export default function Form() {
   const onContentChange = (event) => {
     setContent(event.target.value);
   };
+
+  const onPriceChange = (event) => {
+    setPrice(event.target.value);
+  };
+
+  async function mintLesson(price, url) {
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
+    const signer = provider.getSigner()
+    const waveportalContract = new ethers.Contract(contractAddress, contractABI, signer);
+
+    let course = await waveportalContract.createLesson(price, url);
+
+    console.log("cleaned", course)
+  }
 
   const onFileUpload = () => {
     const pinVideoFileToIPFS = async (pinataApiKey, pinataSecretApiKey) => {
@@ -143,6 +162,7 @@ export default function Form() {
         })
         .then(function (response) {
           console.log(response);
+          return 'https://ipfs.io/ipfs/' + response.data.IpfsHash;
         })
         .catch(function (error) {
           //handle error here
@@ -172,14 +192,15 @@ export default function Form() {
             'https://ipfs.io/ipfs/QmNyKyL9YssHQWGfAUGkigioZWDGZnEbBJHy8pcajmiC7G',
           slug: 'michi_learn',
         },
-        ipfs_video_url: ciphertext,
-        metadata: {
-          name: title,
-          description: description,
-          background_image: ipfsImageUrl,
-        },
-      };
-      pinJSONToIPFS(env.PINATA_KEY, env.PINATA_SECRET_KEY, dataJson);
+        'ipfs_video_url': ciphertext,
+        'metadata': {
+          'name': title,
+          'description': description,
+          'background_image': ipfsImageUrl,
+        }
+      }
+      const uri = await pinJSONToIPFS(env.PINATA_KEY, env.PINATA_SECRET_KEY, dataJson)
+      mintLesson(price, uri)
     }
 
     main();
@@ -246,6 +267,12 @@ export default function Form() {
           type="textarea"
           value={content}
           onChange={onContentChange}
+        ></input>
+        <input
+          type="text"
+          value={price}
+          pattern="[0-9]*"
+          onChange={onPriceChange}
         ></input>
         <br />
         <button onClick={onFileUpload}>Upload!</button>
