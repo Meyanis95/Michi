@@ -4,9 +4,11 @@ import React, { Component, useState } from 'react';
 import env from 'react-dotenv';
 import { v4 as uuidv4 } from 'uuid';
 import { ethers } from "ethers";
-import abi from "../utils/CourseFactory.json"
+import { createClient } from '@supabase/supabase-js'
+import abi from "../utils/CourseFactory.json";
 var CryptoJS = require("crypto-js");
 const FormData = require('form-data');
+const supabase = createClient(env.DB_URL, env.DB_KEY)
 
 export default function Form() {
   const [selectedVideoFile, setSelectedVideoFile] = useState(null);
@@ -16,6 +18,7 @@ export default function Form() {
   const [content, setContent] = useState('');
   const [price, setPrice] = useState(0);
   const [contractAddressCreatad, setContractAddressCreatad] = useState('');
+  const [encryptionKey, setEncryptionKey] = useState(null);
   const [currAccount, setCurrentAccount] = useState("")
   const contractAddress = "0x898bFA5BDfb0a8D36DF067b20D4fdBA7528a4998"
   const contractABI = abi.abi
@@ -44,12 +47,26 @@ export default function Form() {
     setPrice(event.target.value);
   };
 
+  const uploadHashOnDb = async () => {
+    const { data, error } = await supabase.from('lesson_hash').insert([
+      {
+        course_address: contractAddressCreatad,
+        hash: encryptionKey,
+      },
+    ]);
+    if (error) {
+      console.log(error);
+    } else {
+      console.log(data);
+    }
+  }
+
   async function mintLesson(price, url) {
     const provider = new ethers.providers.Web3Provider(window.ethereum);
     const signer = provider.getSigner()
-    const waveportalContract = new ethers.Contract(contractAddress, contractABI, signer);
+    const courseFactoryContract = new ethers.Contract(contractAddress, contractABI, signer);
 
-    let course_txn = await waveportalContract.createLesson(price, url);
+    let course_txn = await courseFactoryContract.createLesson(price, url);
     const receipt = await course_txn.wait()
 
     const event = receipt.events
@@ -178,14 +195,14 @@ export default function Form() {
 
     async function main() {
       const encryption_key = uuidv4();
-      console.log(encryption_key);
+      setEncryptionKey(encryption_key)
       const ipfsVideoUrl = await pinVideoFileToIPFS(
         env.PINATA_KEY,
         env.PINATA_SECRET_KEY
       );
       var ciphertext = CryptoJS.AES.encrypt(
         JSON.stringify(ipfsVideoUrl),
-        encryption_key
+        encryptionKey
       ).toString();
       const ipfsImageUrl = await pinImageFileToIPFS(
         env.PINATA_KEY,
@@ -204,8 +221,9 @@ export default function Form() {
           'background_image': ipfsImageUrl,
         }
       }
-      const uri = await pinJSONToIPFS(env.PINATA_KEY, env.PINATA_SECRET_KEY, dataJson)
-      mintLesson(price, uri)
+      const uri = await pinJSONToIPFS(env.PINATA_KEY, env.PINATA_SECRET_KEY, dataJson);
+      uploadHashOnDb();
+      mintLesson(price, uri);
     }
 
     main();
@@ -235,18 +253,6 @@ export default function Form() {
       );
     }
 
-    // TO ADD hash to the db once we have the address of the contract + the generated hash, to run in the console while waiting
-    // const { data, error } = await supabase.from('lesson_hash').insert([
-    //   {
-    //     course_address: 'gingigg',
-    //     hash: 'ifongoingiogn',
-    //   },
-    // ]);
-    // if (error) {
-    //   console.log(error);
-    // } else {
-    //   console.log(data);
-    // }
   };
 
   return (
