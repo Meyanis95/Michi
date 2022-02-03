@@ -13,6 +13,8 @@ contract CourseFactory {
         owner = msg.sender;
     }
 
+    event NewContractCreated(address _address);
+
     function createLesson(uint256 coursePrice, string memory url) public {
         Course newCourseCreated = new Course(msg.sender, coursePrice, url);
         console.log(address(newCourseCreated));
@@ -22,6 +24,7 @@ contract CourseFactory {
         );
         allContracts.push(address(newCourseCreated));
         ownerContracts[msg.sender] = address(newCourseCreated);
+        emit NewContractCreated(address(newCourseCreated));
     }
 
     function getContracts() public view returns (address[] memory) {
@@ -35,6 +38,4 @@ contract CourseFactory {
     {
         return ownerContracts[_ownerAddress];
     }
-
-    function create 
 }
