@@ -7,6 +7,7 @@ import "hardhat/console.sol";
 contract Course is ERC1155 {
     address owner;
     uint256 public amount;
+    string public meta_url;
     uint256 public constant seat = 0;
 
     constructor(
@@ -16,6 +17,8 @@ contract Course is ERC1155 {
     ) ERC1155(url) {
         owner = deployer;
         amount = coursePrice;
+        meta_url = url;
+        _mint(owner, 0, amount, "");
     }
 
     function takeClass() public payable {
@@ -46,4 +49,12 @@ contract Course is ERC1155 {
     }
 
     receive() external payable {}
+
+    function contractURI() public view returns (string memory) {
+        return meta_url;
+    }
+
+    function setURI(string memory newuri) public {
+        _setURI(newuri);
+    }
 }

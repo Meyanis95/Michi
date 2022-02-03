@@ -15,8 +15,9 @@ export default function Form() {
   const [description, setDescription] = useState('');
   const [content, setContent] = useState('');
   const [price, setPrice] = useState(0);
+  const [contractAddressCreatad, setContractAddressCreatad] = useState('');
   const [currAccount, setCurrentAccount] = useState("")
-  const contractAddress = "0x50d0d47C2C08d5A70BC9bC29734a2f62bEe9Bc24"
+  const contractAddress = "0x898bFA5BDfb0a8D36DF067b20D4fdBA7528a4998"
   const contractABI = abi.abi
 
   const onVideoChange = (event) => {
@@ -48,9 +49,15 @@ export default function Form() {
     const signer = provider.getSigner()
     const waveportalContract = new ethers.Contract(contractAddress, contractABI, signer);
 
-    let course = await waveportalContract.createLesson(price, url);
+    let course_txn = await waveportalContract.createLesson(price, url);
+    const receipt = await course_txn.wait()
 
-    console.log("cleaned", course)
+    const event = receipt.events
+
+    console.log("Address of the contract created ==> ", event[0].address)
+    setContractAddressCreatad(event[0].address)
+
+    console.log("txn:", course_txn);
   }
 
   const onFileUpload = () => {
@@ -185,13 +192,11 @@ export default function Form() {
         env.PINATA_SECRET_KEY
       );
       const dataJson = {
-        collection: {
-          name: 'MICHI',
-          description: 'MICHI is a new way to learn and share knowledge.',
-          image:
-            'https://ipfs.io/ipfs/QmNyKyL9YssHQWGfAUGkigioZWDGZnEbBJHy8pcajmiC7G',
-          slug: 'michi_learn',
-        },
+        name: 'MICHI',
+        description: 'MICHI is a new way to learn and share knowledge.',
+        image:
+          'https://ipfs.io/ipfs/QmNyKyL9YssHQWGfAUGkigioZWDGZnEbBJHy8pcajmiC7G',
+        slug: 'michi_learn',
         'ipfs_video_url': ciphertext,
         'metadata': {
           'name': title,
