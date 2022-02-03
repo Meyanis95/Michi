@@ -35,4 +35,6 @@ contract CourseFactory {
     {
         return ownerContracts[_ownerAddress];
     }
+
+    function create 
 }
