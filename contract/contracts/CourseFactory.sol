@@ -7,11 +7,12 @@ import "./Course.sol";
 contract CourseFactory {
     address[] public allContracts;
     address owner;
-    mapping(address => address) public ownerContracts;
 
     constructor() {
         owner = msg.sender;
     }
+
+    mapping(address => address[]) public allOwnersContracts;
 
     event NewContractCreated(address _address);
 
@@ -23,7 +24,8 @@ contract CourseFactory {
             "There was an issue while creating the course"
         );
         allContracts.push(address(newCourseCreated));
-        ownerContracts[msg.sender] = address(newCourseCreated);
+        allOwnersContracts[msg.sender].push(address(newCourseCreated));
+        //ownerCounter[msg.sender]++;
         emit NewContractCreated(address(newCourseCreated));
     }
 
@@ -31,11 +33,15 @@ contract CourseFactory {
         return allContracts;
     }
 
-    function getCreatorCourse(address _ownerAddress)
+    function getCourses(address _ownerAddress)
         public
         view
-        returns (address)
+        returns (address[] memory)
     {
-        return ownerContracts[_ownerAddress];
+        require(
+            allOwnersContracts[_ownerAddress].length > 0,
+            "You don't have any contract"
+        );
+        return allOwnersContracts[_ownerAddress];
     }
 }

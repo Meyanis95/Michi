@@ -18,7 +18,7 @@ contract Course is ERC1155 {
         owner = deployer;
         amount = coursePrice;
         meta_url = url;
-        _mint(owner, 0, amount, "");
+        _mint(owner, 0, 1, "");
     }
 
     function takeClass() public payable {
